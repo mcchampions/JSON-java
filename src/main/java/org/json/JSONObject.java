@@ -96,7 +96,7 @@ public class JSONObject {
          * @return NULL.
          */
         @Override
-        protected final Object clone() {
+        protected Object clone() {
             return this;
         }
 
@@ -182,9 +182,9 @@ public class JSONObject {
      */
     public JSONObject(JSONObject jo, String ... names) {
         this(names.length);
-        for (int i = 0; i < names.length; i += 1) {
+        for (String name : names) {
             try {
-                this.putOnce(names[i], jo.opt(names[i]));
+                this.putOnce(name, jo.opt(name));
             } catch (Exception ignore) {
             }
         }
@@ -379,8 +379,7 @@ public class JSONObject {
     public JSONObject(Object object, String ... names) {
         this(names.length);
         Class<?> c = object.getClass();
-        for (int i = 0; i < names.length; i += 1) {
-            String name = names[i];
+        for (String name : names) {
             try {
                 this.putOpt(name, c.getField(name).get(object));
             } catch (Exception ignore) {
@@ -423,14 +422,14 @@ public class JSONObject {
 
         Enumeration<String> keys = bundle.getKeys();
         while (keys.hasMoreElements()) {
-            Object key = keys.nextElement();
+            String key = keys.nextElement();
             if (key != null) {
 
 // Go through the path, ensuring that there is a nested JSONObject for each
 // segment except the last. Add the value using the last segment's name into
 // the deepest nested JSONObject.
 
-                String[] path = ((String) key).split("\\.");
+                String[] path = key.split("\\.");
                 int last = path.length - 1;
                 JSONObject target = this;
                 for (int i = 0; i < last; i += 1) {
@@ -442,7 +441,7 @@ public class JSONObject {
                     }
                     target = nextTarget;
                 }
-                target.put(path[last], bundle.getString((String) key));
+                target.put(path[last], bundle.getString(key));
             }
         }
     }
@@ -464,7 +463,6 @@ public class JSONObject {
      * is stored under the key to hold all of the accumulated values. If there
      * is already a JSONArray, then the new value is appended to it. In
      * contrast, the put method replaces the previous value.
-     *
      * If only one value is accumulated that is not a JSONArray, then the result
      * will be the same as using put. But if multiple values are accumulated,
      * then the result will be like append.
@@ -558,18 +556,12 @@ public class JSONObject {
      * @param key
      *            A key string.
      * @return The object associated with the key.
-     * @throws JSONException
-     *             if the key is not found.
      */
-    public Object get(String key) throws JSONException {
+    public Object get(String key) {
         if (key == null) {
-            throw new JSONException("Null key.");
+            return null;
         }
-        Object object = this.opt(key);
-        if (object == null) {
-            throw new JSONException("JSONObject[" + quote(key) + "] not found.");
-        }
-        return object;
+        return this.opt(key);
     }
 
     /**
@@ -587,14 +579,7 @@ public class JSONObject {
      *             to an enum.
      */
     public <E extends Enum<E>> E getEnum(Class<E> clazz, String key) throws JSONException {
-        E val = optEnum(clazz, key);
-        if(val==null) {
-            // JSONException should really take a throwable argument.
-            // If it did, I would re-implement this with the Enum.valueOf
-            // method and place any thrown exception in the JSONException
-            throw wrongValueFormatException(key, "enum of type " + quote(clazz.getSimpleName()), opt(key), null);
-        }
-        return val;
+        return optEnum(clazz, key);
     }
 
     /**
@@ -613,12 +598,9 @@ public class JSONObject {
                 || (object instanceof String && ((String) object)
                         .equalsIgnoreCase("false"))) {
             return false;
-        } else if (object.equals(Boolean.TRUE)
+        } else return object.equals(Boolean.TRUE)
                 || (object instanceof String && ((String) object)
-                        .equalsIgnoreCase("true"))) {
-            return true;
-        }
-        throw wrongValueFormatException(key, "Boolean", object, null);
+                .equalsIgnoreCase("true"));
     }
 
     /**
@@ -633,11 +615,7 @@ public class JSONObject {
      */
     public BigInteger getBigInteger(String key) throws JSONException {
         Object object = this.get(key);
-        BigInteger ret = objectToBigInteger(object, null);
-        if (ret != null) {
-            return ret;
-        }
-        throw wrongValueFormatException(key, "BigInteger", object, null);
+        return objectToBigInteger(object, null);
     }
 
     /**
@@ -655,11 +633,7 @@ public class JSONObject {
      */
     public BigDecimal getBigDecimal(String key) throws JSONException {
         Object object = this.get(key);
-        BigDecimal ret = objectToBigDecimal(object, null);
-        if (ret != null) {
-            return ret;
-        }
-        throw wrongValueFormatException(key, "BigDecimal", object, null);
+        return objectToBigDecimal(object, null);
     }
 
     /**
@@ -680,7 +654,7 @@ public class JSONObject {
         try {
             return Double.parseDouble(object.toString());
         } catch (Exception e) {
-            throw wrongValueFormatException(key, "double", object, e);
+            return 0.0;
         }
     }
 
@@ -702,7 +676,7 @@ public class JSONObject {
         try {
             return Float.parseFloat(object.toString());
         } catch (Exception e) {
-            throw wrongValueFormatException(key, "float", object, e);
+            return 0;
         }
     }
 
@@ -724,7 +698,7 @@ public class JSONObject {
             }
             return stringToNumber(object.toString());
         } catch (Exception e) {
-            throw wrongValueFormatException(key, "number", object, e);
+            return null;
         }
     }
 
@@ -746,7 +720,7 @@ public class JSONObject {
         try {
             return Integer.parseInt(object.toString());
         } catch (Exception e) {
-            throw wrongValueFormatException(key, "int", object, e);
+            return 0;
         }
     }
 
@@ -764,7 +738,7 @@ public class JSONObject {
         if (object instanceof JSONArray) {
             return (JSONArray) object;
         }
-        throw wrongValueFormatException(key, "JSONArray", object, null);
+        return new JSONArray();
     }
 
     /**
@@ -781,7 +755,7 @@ public class JSONObject {
         if (object instanceof JSONObject) {
             return (JSONObject) object;
         }
-        throw wrongValueFormatException(key, "JSONObject", object, null);
+        return new JSONObject();
     }
 
     /**
@@ -802,7 +776,7 @@ public class JSONObject {
         try {
             return Long.parseLong(object.toString());
         } catch (Exception e) {
-            throw wrongValueFormatException(key, "long", object, e);
+            return 0;
         }
     }
 
@@ -858,7 +832,7 @@ public class JSONObject {
         if (object instanceof String) {
             return (String) object;
         }
-        throw wrongValueFormatException(key, "string", object, null);
+        return null;
     }
 
     /**
@@ -892,15 +866,15 @@ public class JSONObject {
         if (value == null) {
             this.put(key, 1);
         } else if (value instanceof Integer) {
-            this.put(key, ((Integer) value).intValue() + 1);
+            this.put(key, (Integer) value + 1);
         } else if (value instanceof Long) {
-            this.put(key, ((Long) value).longValue() + 1L);
+            this.put(key, (Long) value + 1L);
         } else if (value instanceof BigInteger) {
             this.put(key, ((BigInteger)value).add(BigInteger.ONE));
         } else if (value instanceof Float) {
-            this.put(key, ((Float) value).floatValue() + 1.0f);
+            this.put(key, (Float) value + 1.0f);
         } else if (value instanceof Double) {
-            this.put(key, ((Double) value).doubleValue() + 1.0d);
+            this.put(key, (Double) value + 1.0d);
         } else if (value instanceof BigDecimal) {
             this.put(key, ((BigDecimal)value).add(BigDecimal.ONE));
         } else {
@@ -951,7 +925,6 @@ public class JSONObject {
      * match what is returned by the JSONObject get* and opt* functions. Modifying
      * the returned EntrySet or the Entry objects contained therein will modify the
      * backing JSONObject. This does not return a clone or a read-only view.
-     *
      * Use with caution.
      *
      * @see Map#entrySet()
@@ -1121,7 +1094,7 @@ public class JSONObject {
             return defaultValue;
         }
         if (val instanceof Boolean){
-            return ((Boolean) val).booleanValue();
+            return (Boolean) val;
         }
         try {
             // we'll use the get anyway because it does string conversion.
@@ -1160,7 +1133,7 @@ public class JSONObject {
             return defaultValue;
         }
         if (val instanceof Boolean){
-            return ((Boolean) val).booleanValue();
+            return (Boolean) val;
         }
         try {
             // we'll use the get anyway because it does string conversion.
@@ -1222,7 +1195,7 @@ public class JSONObject {
                 return defaultValue;
             }
             if (exact) {
-                return new BigDecimal(((Number)val).doubleValue());
+                return BigDecimal.valueOf(((Number) val).doubleValue());
             }
             // use the string constructor so that we maintain "nice" values for doubles and floats
             // the double constructor will translate doubles to "exact" values instead of the likely
@@ -1277,7 +1250,7 @@ public class JSONObject {
             if (!numberIsFinite((Number)val)) {
                 return defaultValue;
             }
-            return new BigDecimal(((Number) val).doubleValue()).toBigInteger();
+            return BigDecimal.valueOf(((Number) val).doubleValue()).toBigInteger();
         }
         if (val instanceof Long || val instanceof Integer
                 || val instanceof Short || val instanceof Byte){
@@ -1393,11 +1366,8 @@ public class JSONObject {
         if (val == null) {
             return defaultValue;
         }
-        final float floatValue = val.floatValue();
-        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-        // return defaultValue;
-        // }
-        return floatValue;
+
+        return val.floatValue();
     }
 
     /**
@@ -1429,11 +1399,7 @@ public class JSONObject {
         if (val == null) {
             return defaultValue;
         }
-        final Float floatValue = val.floatValue();
-        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-        // return defaultValue;
-        // }
-        return floatValue;
+        return val.floatValue();
     }
 
     /**
@@ -1770,7 +1736,7 @@ public class JSONObject {
         // if the first letter in the key is not uppercase, then skip.
         // This is to maintain backwards compatibility before PR406
         // (https://github.com/stleary/JSON-java/pull/406/)
-        if (key.length() == 0 || Character.isLowerCase(key.charAt(0))) {
+        if (Character.isLowerCase(key.charAt(0))) {
             return null;
         }
         if (key.length() == 1) {
@@ -1816,11 +1782,8 @@ public class JSONObject {
             try {
                 Method im = i.getMethod(m.getName(), m.getParameterTypes());
                 return getAnnotation(im, annotationClass);
-            } catch (final SecurityException ex) {
-                continue;
-            } catch (final NoSuchMethodException ex) {
-                continue;
-            }
+            } catch (final SecurityException ignored) {}
+            catch (final NoSuchMethodException ignored) {}
         }
 
         try {
@@ -1870,11 +1833,8 @@ public class JSONObject {
                     // since the annotation was on the interface, add 1
                     return d + 1;
                 }
-            } catch (final SecurityException ex) {
-                continue;
-            } catch (final NoSuchMethodException ex) {
-                continue;
-            }
+            } catch (final SecurityException ignored) {}
+            catch (final NoSuchMethodException ignored) {}
         }
 
         try {
@@ -2171,7 +2131,6 @@ public class JSONObject {
      *            A String
      * @return A String correctly formatted for insertion in a JSON text.
      */
-    @SuppressWarnings("resource")
     public static String quote(String string) {
         StringWriter sw = new StringWriter();
         synchronized (sw.getBuffer()) {
@@ -2229,7 +2188,7 @@ public class JSONObject {
                 break;
             default:
                 if (c < ' ' || (c >= '\u0080' && c < '\u00a0')
-                        || (c >= '\u2000' && c < '\u2100')) {
+                        || (c >= '\u2000' && c < '℀')) {
                     w.write("\\u");
                     hhhh = Integer.toHexString(c);
                     w.write("0000", 0, 4 - hhhh.length());
@@ -2309,7 +2268,6 @@ public class JSONObject {
 
     /**
      * Compares two numbers to see if they are similar.
-     *
      * If either of the numbers are Double or Float instances, then they are checked to have
      * a finite value. If either value is not finite (NaN or &#177;infinity), then this
      * function will always return false. If both numbers are finite, they are first checked
@@ -2350,10 +2308,7 @@ public class JSONObject {
     private static boolean numberIsFinite(Number n) {
         if (n instanceof Double && (((Double) n).isInfinite() || ((Double) n).isNaN())) {
             return false;
-        } else if (n instanceof Float && (((Float) n).isInfinite() || ((Float) n).isNaN())) {
-            return false;
-        }
-        return true;
+        } else return !(n instanceof Float) || (!((Float) n).isInfinite() && !((Float) n).isNaN());
     }
 
     /**
@@ -2388,7 +2343,7 @@ public class JSONObject {
                 try {
                     BigDecimal bd = new BigDecimal(val);
                     if(initial == '-' && BigDecimal.ZERO.compareTo(bd)==0) {
-                        return Double.valueOf(-0.0);
+                        return -0.0d;
                     }
                     return bd;
                 } catch (NumberFormatException retryAsDouble) {
@@ -2427,10 +2382,10 @@ public class JSONObject {
             // long lived.
             BigInteger bi = new BigInteger(val);
             if(bi.bitLength() <= 31){
-                return Integer.valueOf(bi.intValue());
+                return bi.intValue();
             }
             if(bi.bitLength() <= 63){
-                return Long.valueOf(bi.longValue());
+                return bi.longValue();
             }
             return bi;
         }
@@ -2564,7 +2519,6 @@ public class JSONObject {
      * @throws JSONException
      *             If the object contains an invalid number.
      */
-    @SuppressWarnings("resource")
     public String toString(int indentFactor) throws JSONException {
         StringWriter w = new StringWriter();
         synchronized (w.getBuffer()) {
@@ -2626,13 +2580,13 @@ public class JSONObject {
                 return NULL;
             }
             if (object instanceof JSONObject || object instanceof JSONArray
-                    || NULL.equals(object) || object instanceof JSONString
+                    || object instanceof JSONString || object instanceof Enum
                     || object instanceof Byte || object instanceof Character
                     || object instanceof Short || object instanceof Integer
                     || object instanceof Long || object instanceof Boolean
                     || object instanceof Float || object instanceof Double
                     || object instanceof String || object instanceof BigInteger
-                    || object instanceof BigDecimal || object instanceof Enum) {
+                    || object instanceof BigDecimal) {
                 return object;
             }
 
@@ -2681,10 +2635,9 @@ public class JSONObject {
         return this.write(writer, 0, 0);
     }
 
-    @SuppressWarnings("resource")
-    static final Writer writeValue(Writer writer, Object value,
-            int indentFactor, int indent) throws JSONException, IOException {
-        if (value == null || value.equals(null)) {
+    static Writer writeValue(Writer writer, Object value,
+                             int indentFactor, int indent) throws JSONException, IOException {
+        if (value == null) {
             writer.write("null");
         } else if (value instanceof JSONString) {
             Object o;
@@ -2726,7 +2679,7 @@ public class JSONObject {
         return writer;
     }
 
-    static final void indent(Writer writer, int indent) throws IOException {
+    static void indent(Writer writer, int indent) throws IOException {
         for (int i = 0; i < indent; i += 1) {
             writer.write(' ');
         }
@@ -2759,7 +2712,6 @@ public class JSONObject {
      * @throws JSONException if a called function has an error or a write error
      * occurs
      */
-    @SuppressWarnings("resource")
     public Writer write(Writer writer, int indentFactor, int indent)
             throws JSONException {
         try {

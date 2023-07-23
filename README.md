@@ -10,7 +10,8 @@ JSON in Java [package org.json]
 
 **[Click here if you just want the latest release jar file.](https://search.maven.org/remotecontent?filepath=org/json/json/20230618/json-20230618.jar)**
 
-
+# 修改说明
+本分支修改了原本json库没有对应的key就报错改为返回null,新初始化jsonArray和jsonObject,int/double等返回0/0.0,boolean返回false
 # Overview
 
 [JSON](http://www.JSON.org/) is a light-weight language-independent data interchange format.
@@ -52,15 +53,15 @@ jar cf json-java.jar org/json/*.class
 
 *Compile a program that uses the jar (see example code below)*
 ````
-javac -cp .;json-java.jar Test.java (Windows)
-javac -cp .:json-java.jar Test.java (Unix Systems)
+javac -cp .;json-java.jar TestJson.java (Windows)
+javac -cp .:json-java.jar TestJson.java (Unix Systems)
 ````
 
-*Test file contents*
+*TestJson file contents*
 
 ````
 import org.json.JSONObject;
-public class Test {
+public class TestJson {
     public static void main(String args[]){
        JSONObject jo = new JSONObject("{ \"abc\" : \"def\" }");
        System.out.println(jo.toString());
@@ -68,10 +69,10 @@ public class Test {
 }
 ````
 
-*Execute the Test file*
+*Execute the TestJson file*
 ```` 
-java -cp .;json-java.jar Test (Windows)
-java -cp .:json-java.jar Test (Unix Systems)
+java -cp .;json-java.jar TestJson (Windows)
+java -cp .:json-java.jar TestJson (Unix Systems)
 ````
 
 *Expected output*

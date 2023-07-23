@@ -69,9 +69,9 @@ jArr.putAll(new JSONArray(new SomeBean[]{ new SomeBean(3), new SomeBean(4) }));
 // our jArr is now consistent.
 ```
 
-**Unit Test Conventions**
+**Unit TestJson Conventions**
 
-Test filenames should consist of the name of the module being tested, with the suffix "Test". 
+TestJson filenames should consist of the name of the module being tested, with the suffix "TestJson". 
 For example, <b>Cookie.java</b> is tested by <b>CookieTest.java</b>.
 
 <b>The fundamental issues with JSON-Java testing are:</b><br>

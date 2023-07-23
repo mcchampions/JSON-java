@@ -56,7 +56,6 @@ public class JSONPointer {
 
         /**
          * Adds an arbitrary token to the list of reference tokens. It can be any non-null value.
-         * 
          * Unlike in the case of JSON string or URI fragment representation of JSON pointers, the
          * argument of this method MUST NOT be escaped. If you want to query the property called
          * {@code "a~b"} then you should simply pass the {@code "a~b"} string as-is, there is no
