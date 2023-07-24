@@ -2216,9 +2216,6 @@ public class JSONObject {
 
     /**
      * Determine if two JSONObjects are similar.
-     * They must contain the same set of names which must be associated with
-     * similar values.
-     *
      * @param other The other JSONObject
      * @return true if they are equal
      */
@@ -2783,9 +2780,9 @@ public class JSONObject {
             if (entry.getValue() == null || NULL.equals(entry.getValue())) {
                 value = null;
             } else if (entry.getValue() instanceof JSONObject) {
-                value = ((JSONObject) entry.getValue()).toMap();
+                value = entry.getValue();
             } else if (entry.getValue() instanceof JSONArray) {
-                value = ((JSONArray) entry.getValue()).toList();
+                value = entry.getValue();
             } else {
                 value = entry.getValue();
             }
