@@ -16,6 +16,8 @@ JSON in Java [package org.json]
 增加了json转toml类(TomlSerializer)
 
 同时修改了JSONObject#toMap中把JSONArray作为数组传参修改成传递JSONArray,避免了一些数据错乱问题
+
+修复了部分bug
 # Overview
 
 [JSON](http://www.JSON.org/) is a light-weight language-independent data interchange format.

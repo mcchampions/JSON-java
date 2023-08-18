@@ -1862,4 +1862,8 @@ public class JSONArray implements Iterable<Object> {
                 , cause);
     }
 
+    @Override
+    public JSONArray clone() {
+        return new JSONArray(this.iterator());
+    }
 }
