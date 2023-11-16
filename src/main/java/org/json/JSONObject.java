@@ -28,6 +28,9 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static org.json.NumberConversionUtil.potentialNumber;
+import static org.json.NumberConversionUtil.stringToNumber;
+
 /**
  * A JSONObject is an unordered collection of name/value pairs. Its external
  * form is a string wrapped in curly braces with colons between the names and
@@ -208,22 +211,14 @@ public class JSONObject {
             throw x.syntaxError("A JSONObject text must begin with '{'");
         }
         for (;;) {
-            char prev = x.getPrevious();
             c = x.nextClean();
             switch (c) {
             case 0:
                 throw x.syntaxError("A JSONObject text must end with '}'");
             case '}':
                 return;
-            case '{':
-            case '[':
-                if(prev=='{') {
-                    throw x.syntaxError("A JSON Object can not directly nest another JSON Object or JSON Array.");
-                }
-                // fall through
             default:
-                x.back();
-                key = x.nextValue().toString();
+                key = x.nextSimpleValue(c).toString();
             }
 
             // The key is followed by ':'.
@@ -291,6 +286,7 @@ public class JSONObject {
         	    }
                 final Object value = e.getValue();
                 if (value != null) {
+                    testValidity(value);
                     this.map.put(String.valueOf(e.getKey()), wrap(value));
                 }
             }
@@ -1478,8 +1474,22 @@ public class JSONObject {
      * @return A JSONArray which is the value.
      */
     public JSONArray optJSONArray(String key) {
-        Object o = this.opt(key);
-        return o instanceof JSONArray ? (JSONArray) o : null;
+        return this.optJSONArray(key, null);
+    }
+
+    /**
+     * Get an optional JSONArray associated with a key, or the default if there
+     * is no such key, or if its value is not a JSONArray.
+     *
+     * @param key
+     *            A key string.
+     * @param defaultValue
+     *            The default.
+     * @return A JSONArray which is the value.
+     */
+    public JSONArray optJSONArray(String key, JSONArray defaultValue) {
+        Object object = this.opt(key);
+        return object instanceof JSONArray ? (JSONArray) object : defaultValue;
     }
 
     /**
@@ -2136,13 +2146,11 @@ public class JSONObject {
      */
     public static String quote(String string) {
         StringWriter sw = new StringWriter();
-        synchronized (sw.getBuffer()) {
-            try {
-                return quote(string, sw).toString();
-            } catch (IOException ignored) {
-                // will never happen - we are writing to a string writer
-                return "";
-            }
+        try {
+            return quote(string, sw).toString();
+        } catch (IOException ignored) {
+            // will never happen - we are writing to a string writer
+            return "";
         }
     }
 
@@ -2323,76 +2331,6 @@ public class JSONObject {
     }
 
     /**
-     * Converts a string to a number using the narrowest possible type. Possible
-     * returns for this function are BigDecimal, Double, BigInteger, Long, and Integer.
-     * When a Double is returned, it should always be a valid Double and not NaN or +-infinity.
-     *
-     * @param val value to convert
-     * @return Number representation of the value.
-     * @throws NumberFormatException thrown if the value is not a valid number. A public
-     *      caller should catch this and wrap it in a {@link JSONException} if applicable.
-     */
-    protected static Number stringToNumber(final String val) throws NumberFormatException {
-        char initial = val.charAt(0);
-        if ((initial >= '0' && initial <= '9') || initial == '-') {
-            // decimal representation
-            if (isDecimalNotation(val)) {
-                // Use a BigDecimal all the time so we keep the original
-                // representation. BigDecimal doesn't support -0.0, ensure we
-                // keep that by forcing a decimal.
-                try {
-                    BigDecimal bd = new BigDecimal(val);
-                    if(initial == '-' && BigDecimal.ZERO.compareTo(bd)==0) {
-                        return -0.0d;
-                    }
-                    return bd;
-                } catch (NumberFormatException retryAsDouble) {
-                    // this is to support "Hex Floats" like this: 0x1.0P-1074
-                    try {
-                        Double d = Double.valueOf(val);
-                        if(d.isNaN() || d.isInfinite()) {
-                            throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                        }
-                        return d;
-                    } catch (NumberFormatException ignore) {
-                        throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                    }
-                }
-            }
-            // block items like 00 01 etc. Java number parsers treat these as Octal.
-            if(initial == '0' && val.length() > 1) {
-                char at1 = val.charAt(1);
-                if(at1 >= '0' && at1 <= '9') {
-                    throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                }
-            } else if (initial == '-' && val.length() > 2) {
-                char at1 = val.charAt(1);
-                char at2 = val.charAt(2);
-                if(at1 == '0' && at2 >= '0' && at2 <= '9') {
-                    throw new NumberFormatException("val ["+val+"] is not a valid number.");
-                }
-            }
-            // integer representation.
-            // This will narrow any values to the smallest reasonable Object representation
-            // (Integer, Long, or BigInteger)
-
-            // BigInteger down conversion: We use a similar bitLength compare as
-            // BigInteger#intValueExact uses. Increases GC, but objects hold
-            // only what they need. i.e. Less runtime overhead if the value is
-            // long lived.
-            BigInteger bi = new BigInteger(val);
-            if(bi.bitLength() <= 31){
-                return bi.intValue();
-            }
-            if(bi.bitLength() <= 63){
-                return bi.longValue();
-            }
-            return bi;
-        }
-        throw new NumberFormatException("val ["+val+"] is not a valid number.");
-    }
-
-    /**
      * Try to convert a string into a number, boolean, or null. If the string
      * can't be converted, return the string.
      *
@@ -2521,9 +2459,7 @@ public class JSONObject {
      */
     public String toString(int indentFactor) throws JSONException {
         StringWriter w = new StringWriter();
-        synchronized (w.getBuffer()) {
-            return this.write(w, indentFactor, 0).toString();
-        }
+        return this.write(w, indentFactor, 0).toString();
     }
 
     /**

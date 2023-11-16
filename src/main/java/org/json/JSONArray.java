@@ -331,7 +331,7 @@ public class JSONArray implements Iterable<Object> {
             if (object instanceof Number) {
                 return (Number)object;
             }
-            return JSONObject.stringToNumber(object.toString());
+            return NumberConversionUtil.stringToNumber(object.toString());
         } catch (Exception e) {
             throw wrongValueFormatException(index, "number", object, e);
         }
@@ -924,30 +924,57 @@ public class JSONArray implements Iterable<Object> {
     }
 
     /**
-     * Get the optional JSONArray associated with an index.
+     * Get the optional JSONArray associated with an index. Null is returned if
+     * there is no value at that index or if the value is not a JSONArray.
      *
      * @param index
-     *            subscript
-     * @return A JSONArray value, or null if the index has no value, or if the
-     *         value is not a JSONArray.
+     *            The index must be between 0 and length() - 1.
+     * @return A JSONArray value.
      */
     public JSONArray optJSONArray(int index) {
-        Object o = this.opt(index);
-        return o instanceof JSONArray ? (JSONArray) o : null;
+        return this.optJSONArray(index, null);
+    }
+
+    /**
+     * Get the optional JSONArray associated with an index. The defaultValue is returned if
+     * there is no value at that index or if the value is not a JSONArray.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @param defaultValue
+     *            The default.
+     * @return A JSONArray value.
+     */
+    public JSONArray optJSONArray(int index, JSONArray defaultValue) {
+        Object object = this.opt(index);
+        return object instanceof JSONArray ? (JSONArray) object : defaultValue;
     }
 
     /**
      * Get the optional JSONObject associated with an index. Null is returned if
-     * the key is not found, or null if the index has no value, or if the value
-     * is not a JSONObject.
+     * there is no value at that index or if the value is not a JSONObject.
      *
      * @param index
      *            The index must be between 0 and length() - 1.
      * @return A JSONObject value.
      */
     public JSONObject optJSONObject(int index) {
-        Object o = this.opt(index);
-        return o instanceof JSONObject ? (JSONObject) o : null;
+        return this.optJSONObject(index, null);
+    }
+
+    /**
+     * Get the optional JSONObject associated with an index. The defaultValue is returned if
+     * there is no value at that index or if the value is not a JSONObject.
+     *
+     * @param index
+     *            The index must be between 0 and length() - 1.
+     * @param defaultValue
+     *            The default.
+     * @return A JSONObject value.
+     */
+    public JSONObject optJSONObject(int index, JSONObject defaultValue) {
+        Object object = this.opt(index);
+        return object instanceof JSONObject ? (JSONObject) object : defaultValue;
     }
 
     /**
@@ -1051,7 +1078,7 @@ public class JSONArray implements Iterable<Object> {
         
         if (val instanceof String) {
             try {
-                return JSONObject.stringToNumber((String) val);
+                return NumberConversionUtil.stringToNumber((String) val);
             } catch (Exception e) {
                 return defaultValue;
             }
@@ -1619,9 +1646,7 @@ public class JSONArray implements Iterable<Object> {
     @SuppressWarnings("resource")
     public String toString(int indentFactor) throws JSONException {
         StringWriter sw = new StringWriter();
-        synchronized (sw.getBuffer()) {
-            return this.write(sw, indentFactor, 0).toString();
-        }
+        return this.write(sw, indentFactor, 0).toString();
     }
 
     /**
