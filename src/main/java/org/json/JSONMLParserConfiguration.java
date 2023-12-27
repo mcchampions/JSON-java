@@ -14,12 +14,16 @@ public class JSONMLParserConfiguration extends ParserConfiguration {
      */
     public static final int DEFAULT_MAXIMUM_NESTING_DEPTH = ParserConfiguration.DEFAULT_MAXIMUM_NESTING_DEPTH;
 
-    /** Original Configuration of the XML to JSONML Parser. */
+    /**
+     * Original Configuration of the XML to JSONML Parser.
+     */
     public static final JSONMLParserConfiguration ORIGINAL
-        = new JSONMLParserConfiguration();
-    /** Original configuration of the XML to JSONML Parser except that values are kept as strings. */
+            = new JSONMLParserConfiguration();
+    /**
+     * Original configuration of the XML to JSONML Parser except that values are kept as strings.
+     */
     public static final JSONMLParserConfiguration KEEP_STRINGS
-        = new JSONMLParserConfiguration().withKeepStrings(true);
+            = new JSONMLParserConfiguration().withKeepStrings(true);
 
     /**
      * Default parser configuration. Does not keep strings (tries to implicitly convert values).
@@ -31,8 +35,9 @@ public class JSONMLParserConfiguration extends ParserConfiguration {
 
     /**
      * Configure the parser string processing and use the default CDATA Tag Name as "content".
-     * @param keepStrings <code>true</code> to parse all values as string.
-     *      <code>false</code> to try and convert XML string values into a JSON value.
+     *
+     * @param keepStrings     <code>true</code> to parse all values as string.
+     *                        <code>false</code> to try and convert XML string values into a JSON value.
      * @param maxNestingDepth <code>int</code> to limit the nesting depth
      */
     protected JSONMLParserConfiguration(final boolean keepStrings, final int maxNestingDepth) {
