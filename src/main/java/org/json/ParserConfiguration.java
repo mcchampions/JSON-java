@@ -72,6 +72,7 @@ public class ParserConfiguration {
      * @param newVal new value to use for the <code>keepStrings</code> configuration option.
      * @return The existing configuration will not be modified. A new configuration is returned.
      */
+    @SuppressWarnings("unchecked")
     public <T extends ParserConfiguration> T withKeepStrings(final boolean newVal) {
         T newConfig = (T) this.clone();
         newConfig.keepStrings = newVal;
@@ -98,14 +99,11 @@ public class ParserConfiguration {
      * @param maxNestingDepth the maximum nesting depth allowed to the XML parser
      * @return The existing configuration will not be modified. A new configuration is returned.
      */
+    @SuppressWarnings("unchecked")
     public <T extends ParserConfiguration> T withMaxNestingDepth(int maxNestingDepth) {
         T newConfig = (T) this.clone();
 
-        if (maxNestingDepth > UNDEFINED_MAXIMUM_NESTING_DEPTH) {
-            newConfig.maxNestingDepth = maxNestingDepth;
-        } else {
-            newConfig.maxNestingDepth = UNDEFINED_MAXIMUM_NESTING_DEPTH;
-        }
+        newConfig.maxNestingDepth = Math.max(maxNestingDepth, UNDEFINED_MAXIMUM_NESTING_DEPTH);
 
         return newConfig;
     }

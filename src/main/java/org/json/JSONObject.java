@@ -138,6 +138,7 @@ public class JSONObject {
      */
     private final Map<String, Object> map;
 
+
     public Class<? extends Map> getMapType() {
         return map.getClass();
     }
@@ -160,7 +161,7 @@ public class JSONObject {
         // implementations to rearrange their items for a faster element
         // retrieval based on associative access.
         // Therefore, an implementation mustn't rely on the order of the item.
-        this.map = new HashMap<String, Object>();
+        this.map = new HashMap<>();
     }
 
     /**
@@ -281,9 +282,9 @@ public class JSONObject {
             throw new JSONException("JSONObject has reached recursion depth limit of " + jsonParserConfiguration.getMaxNestingDepth());
         }
         if (m == null) {
-            this.map = new HashMap<String, Object>();
+            this.map = new HashMap<>();
         } else {
-            this.map = new HashMap<String, Object>(m.size());
+            this.map = new HashMap<>(m.size());
             for (final Entry<?, ?> e : m.entrySet()) {
                 if (e.getKey() == null) {
                     throw new NullPointerException("Null key.");
@@ -449,7 +450,7 @@ public class JSONObject {
      * @param initialCapacity initial capacity of the internal map.
      */
     protected JSONObject(int initialCapacity) {
-        this.map = new HashMap<String, Object>(initialCapacity);
+        this.map = new HashMap<>(initialCapacity);
     }
 
     /**
@@ -998,9 +999,7 @@ public class JSONObject {
                 return myE;
             }
             return Enum.valueOf(clazz, val.toString());
-        } catch (IllegalArgumentException e) {
-            return defaultValue;
-        } catch (NullPointerException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             return defaultValue;
         }
     }
@@ -1558,7 +1557,7 @@ public class JSONObject {
      * @see JSONObject#JSONObject(Object)
      */
     private void populateMap(Object bean) {
-        populateMap(bean, Collections.newSetFromMap(new IdentityHashMap<Object, Boolean>()));
+        populateMap(bean, Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
     private void populateMap(Object bean, Set<Object> objectsRecord) {
@@ -1605,9 +1604,7 @@ public class JSONObject {
                                 }
                             }
                         }
-                    } catch (IllegalAccessException ignore) {
-                    } catch (IllegalArgumentException ignore) {
-                    } catch (InvocationTargetException ignore) {
+                    } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException ignore) {
                     }
                 }
             }
@@ -1686,18 +1683,18 @@ public class JSONObject {
             try {
                 Method im = i.getMethod(m.getName(), m.getParameterTypes());
                 return getAnnotation(im, annotationClass);
-            } catch (final SecurityException ignored) {
-            } catch (final NoSuchMethodException ignored) {
-            }
+            } catch (SecurityException | NoSuchMethodException ignored) {}
         }
 
         try {
+            //If the superclass is Object, no annotations will be found any more
+            if (c.getSuperclass().equals(Object.class))
+                return null;
+
             return getAnnotation(
                     c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()),
                     annotationClass);
-        } catch (final SecurityException ex) {
-            return null;
-        } catch (final NoSuchMethodException ex) {
+        } catch (final SecurityException | NoSuchMethodException ex) {
             return null;
         }
     }
@@ -1736,11 +1733,12 @@ public class JSONObject {
                     // since the annotation was on the interface, add 1
                     return d + 1;
                 }
-            } catch (final SecurityException ignored) {
-            } catch (final NoSuchMethodException ignored) {
+            } catch (final SecurityException | NoSuchMethodException ignored) {
             }
         }
-
+        //If the superclass is Object, no annotations will be found any more
+        if (c.getSuperclass().equals(Object.class))
+            return -1;
         try {
             int d = getAnnotationDepth(
                     c.getSuperclass().getMethod(m.getName(), m.getParameterTypes()),
@@ -1750,9 +1748,7 @@ public class JSONObject {
                 return d + 1;
             }
             return -1;
-        } catch (final SecurityException ex) {
-            return -1;
-        } catch (final NoSuchMethodException ex) {
+        } catch (final SecurityException | NoSuchMethodException ex) {
             return -1;
         }
     }
@@ -2574,7 +2570,7 @@ public class JSONObject {
      * @return a java.util.Map containing the entries of this object
      */
     public Map<String, Object> toMap() {
-        Map<String, Object> results = new HashMap<String, Object>();
+        Map<String, Object> results = new HashMap<>(this.entrySet().size());
         for (Entry<String, Object> entry : this.entrySet()) {
             Object value;
             if (entry.getValue() == null || NULL.equals(entry.getValue())) {

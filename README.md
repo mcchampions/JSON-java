@@ -1,8 +1,3 @@
-![Json-Java logo](https://github.com/stleary/JSON-java/blob/master/images/JsonJava.png?raw=true)
-
-<sub><sup>image credit: Ismael Pérez Ortiz</sup></sub>
-
-
 JSON in Java [package org.json]
 ===============================
 
@@ -18,6 +13,8 @@ JSON in Java [package org.json]
 同时修改了JSONObject#toMap中把JSONArray作为数组传参修改成传递JSONArray,避免了一些数据错乱问题
 
 修复了部分bug
+
+只保留了JSON内容,移除了xml和http相关的内容
 # Overview
 
 [JSON](http://www.JSON.org/) is a light-weight language-independent data interchange format.
