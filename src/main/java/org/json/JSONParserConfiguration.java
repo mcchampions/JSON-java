@@ -31,6 +31,7 @@ public class JSONParserConfiguration extends ParserConfiguration {
         this.overwriteDuplicateKey = false;
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     protected JSONParserConfiguration clone() {
         JSONParserConfiguration clone = new JSONParserConfiguration();

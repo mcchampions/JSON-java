@@ -51,6 +51,7 @@ public class ParserConfiguration {
     /**
      * Provides a new instance of the same configuration.
      */
+    @SuppressWarnings({"CloneDoesntDeclareCloneNotSupportedException", "MethodDoesntCallSuperMethod"})
     @Override
     protected ParserConfiguration clone() {
         // future modifications to this method should always ensure a "deep"

@@ -745,9 +745,6 @@ public class JSONArray implements Iterable<Object> {
         if (val == null) {
             return defaultValue;
         }
-        // if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
-        // return defaultValue;
-        // }
         return val.doubleValue();
     }
 
@@ -780,9 +777,6 @@ public class JSONArray implements Iterable<Object> {
         if (val == null) {
             return defaultValue;
         }
-        // if (Double.isNaN(doubleValue) || Double.isInfinite(doubleValue)) {
-        // return defaultValue;
-        // }
         return val.doubleValue();
     }
 
@@ -815,9 +809,6 @@ public class JSONArray implements Iterable<Object> {
         if (val == null) {
             return defaultValue;
         }
-        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-        // return floatValue;
-        // }
         return val.floatValue();
     }
 
@@ -850,9 +841,6 @@ public class JSONArray implements Iterable<Object> {
         if (val == null) {
             return defaultValue;
         }
-        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-        // return floatValue;
-        // }
         return val.floatValue();
     }
 
@@ -1632,6 +1620,7 @@ public class JSONArray implements Iterable<Object> {
      * @param other The other JSONArray
      * @return true if they are equal
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean similar(Object other) {
         if (!(other instanceof JSONArray)) {
             return false;

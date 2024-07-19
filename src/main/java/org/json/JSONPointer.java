@@ -162,9 +162,6 @@ public class JSONPointer {
             }
         } while (slashIdx >= 0);
         // using split does not take into account consecutive separators or "ending nulls"
-        //for (String token : refs.split("/")) {
-        //    this.refTokens.add(unescape(token));
-        //}
     }
 
     /**

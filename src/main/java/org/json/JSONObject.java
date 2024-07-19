@@ -85,6 +85,7 @@ public class JSONObject {
          *
          * @return NULL.
          */
+        @SuppressWarnings("MethodDoesntCallSuperMethod")
         @Override
         protected Object clone() {
             return this;
@@ -99,7 +100,7 @@ public class JSONObject {
          *         null.
          */
         @Override
-        @SuppressWarnings("lgtm[java/unchecked-cast-in-equals]")
+        @SuppressWarnings({"lgtm[java/unchecked-cast-in-equals]", "EqualsWhichDoesntCheckParameterClass"})
         public boolean equals(Object object) {
             return object == null || object == this;
         }
@@ -140,6 +141,7 @@ public class JSONObject {
      *
      * @return The class object representing the type of the underlying Map.
      */
+    @SuppressWarnings("rawtypes")
     public Class<? extends Map> getMapType() {
         return map.getClass();
     }
@@ -512,7 +514,6 @@ public class JSONObject {
      * is stored under the key to hold all of the accumulated values. If there
      * is already a JSONArray, then the new value is appended to it. In
      * contrast, the put method replaces the previous value.
-     *
      * If only one value is accumulated that is not a JSONArray, then the result
      * will be the same as using put. But if multiple values are accumulated,
      * then the result will be like append.
@@ -995,7 +996,6 @@ public class JSONObject {
      * match what is returned by the JSONObject get* and opt* functions. Modifying
      * the returned EntrySet or the Entry objects contained therein will modify the
      * backing JSONObject. This does not return a clone or a read-only view.
-     *
      * Use with caution.
      *
      * @see Map#entrySet()
@@ -1435,9 +1435,6 @@ public class JSONObject {
         if (val == null) {
             return defaultValue;
         }
-        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-        // return defaultValue;
-        // }
         return val.floatValue();
     }
 
@@ -1470,9 +1467,6 @@ public class JSONObject {
         if (val == null) {
             return defaultValue;
         }
-        // if (Float.isNaN(floatValue) || Float.isInfinite(floatValue)) {
-        // return defaultValue;
-        // }
         return val.floatValue();
     }
 
@@ -2325,6 +2319,7 @@ public class JSONObject {
      * @param other The other JSONObject
      * @return true if they are equal
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean similar(Object other) {
         try {
             if (!(other instanceof JSONObject)) {
@@ -2371,7 +2366,6 @@ public class JSONObject {
 
     /**
      * Compares two numbers to see if they are similar.
-     *
      * If either of the numbers are Double or Float instances, then they are checked to have
      * a finite value. If either value is not finite (NaN or &#177;infinity), then this
      * function will always return false. If both numbers are finite, they are first checked
@@ -2384,6 +2378,7 @@ public class JSONObject {
      * @param r the right value to compare. Can not be <code>null</code>.
      * @return true if the numbers are similar, false otherwise.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     static boolean isNumberSimilar(Number l, Number r) {
         if (!numberIsFinite(l) || !numberIsFinite(r)) {
             // non-finite numbers are never similar
@@ -2409,6 +2404,7 @@ public class JSONObject {
         return lBigDecimal.compareTo(rBigDecimal) == 0;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean numberIsFinite(Number n) {
         if (n instanceof Double && (((Double) n).isInfinite() || ((Double) n).isNaN())) {
             return false;
