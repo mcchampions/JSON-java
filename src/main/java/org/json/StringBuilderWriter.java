@@ -87,6 +87,6 @@ public class StringBuilderWriter extends Writer {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
     }
 }

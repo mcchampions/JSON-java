@@ -16,7 +16,6 @@ Public Domain.
 /**
  * A JSON Pointer is a simple query language defined for JSON documents by
  * <a href="https://tools.ietf.org/html/rfc6901">RFC 6901</a>.
- * 
  * In a nutshell, JSONPointer allows the user to navigate into a JSON document
  * using strings, and retrieve targeted objects, like a simple form of XPATH.
  * Path segments are separated by the '/' char, which signifies the root of
@@ -62,7 +61,6 @@ public class JSONPointer {
 
         /**
          * Adds an arbitrary token to the list of reference tokens. It can be any non-null value.
-         * 
          * Unlike in the case of JSON string or URI fragment representation of JSON pointers, the
          * argument of this method MUST NOT be escaped. If you want to query the property called
          * {@code "a~b"} then you should simply pass the {@code "a~b"} string as-is, there is no
