@@ -4,6 +4,8 @@ package org.json;
 Public Domain.
  */
 
+import java.io.Serial;
+
 /**
  * The JSONException is thrown by the JSON.org classes when things are amiss.
  *
@@ -12,6 +14,7 @@ Public Domain.
  */
 public class JSONException extends RuntimeException {
     /** Serialization ID */
+    @Serial
     private static final long serialVersionUID = 0;
 
     /**

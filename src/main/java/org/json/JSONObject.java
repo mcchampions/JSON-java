@@ -614,11 +614,7 @@ public class JSONObject {
         if (key == null) {
             throw new JSONException("Null key.");
         }
-        Object object = this.opt(key);
-        if (object == null) {
-            throw new JSONException("JSONObject[" + quote(key) + "] not found.");
-        }
-        return object;
+        return this.opt(key);
     }
 
     /**
