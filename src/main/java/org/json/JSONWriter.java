@@ -59,7 +59,7 @@ public class JSONWriter {
     /**
      * The object/array stack.
      */
-    private final JSONObject stack[];
+    private final JSONObject[] stack;
 
     /**
      * The stack top index. A value of 0 indicates that the stack is empty.
@@ -302,7 +302,7 @@ public class JSONWriter {
      *             If the value is or contains an invalid number.
      */
     public static String valueToString(Object value) throws JSONException {
-        if (value == null || value.equals(null)) {
+        if (value == null) {
             return "null";
         }
         if (value instanceof JSONString) {
@@ -315,7 +315,7 @@ public class JSONWriter {
             if (object != null) {
                 return object;
             }
-            throw new JSONException("Bad value from toJSONString: " + object);
+            throw new JSONException("error value");
         }
         if (value instanceof Number) {
             // not all Numbers may match actual JSON Numbers. i.e. Fractions or Complex
@@ -332,12 +332,10 @@ public class JSONWriter {
                 || value instanceof JSONArray) {
             return value.toString();
         }
-        if (value instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) value;
+        if (value instanceof Map<?, ?> map) {
             return new JSONObject(map).toString();
         }
-        if (value instanceof Collection) {
-            Collection<?> coll = (Collection<?>) value;
+        if (value instanceof Collection<?> coll) {
             return new JSONArray(coll).toString();
         }
         if (value.getClass().isArray()) {
