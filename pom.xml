@@ -3,7 +3,7 @@
 
     <groupId>org.json</groupId>
     <artifactId>json</artifactId>
-    <version>qs-fork-3.1.1</version>
+    <version>qs-fork-2.0.1</version>
     <packaging>jar</packaging>
 
     <name>JSON in Java</name>
