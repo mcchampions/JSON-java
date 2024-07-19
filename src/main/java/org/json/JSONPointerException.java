@@ -4,6 +4,8 @@ package org.json;
 Public Domain.
 */
 
+import java.io.Serial;
+
 /**
  * The JSONPointerException is thrown by {@link JSONPointer} if an error occurs
  * during evaluating a pointer.
@@ -12,6 +14,7 @@ Public Domain.
  * @version 2016-05-13
  */
 public class JSONPointerException extends JSONException {
+    @Serial
     private static final long serialVersionUID = 8872944667561856751L;
 
     /**

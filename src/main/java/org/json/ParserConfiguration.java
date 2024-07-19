@@ -115,11 +115,7 @@ public class ParserConfiguration {
     public <T extends ParserConfiguration> T withMaxNestingDepth(int maxNestingDepth) {
         T newConfig = (T) this.clone();
 
-        if (maxNestingDepth > UNDEFINED_MAXIMUM_NESTING_DEPTH) {
-            newConfig.maxNestingDepth = maxNestingDepth;
-        } else {
-            newConfig.maxNestingDepth = UNDEFINED_MAXIMUM_NESTING_DEPTH;
-        }
+        newConfig.maxNestingDepth = Math.max(maxNestingDepth, UNDEFINED_MAXIMUM_NESTING_DEPTH);
 
         return newConfig;
     }

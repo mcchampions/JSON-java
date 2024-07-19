@@ -1,7 +1,7 @@
 package org.json;
 
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class JSONTokener {
         this.character = 1;
         this.characterPreviousLine = 0;
         this.line = 1;
-        this.smallCharMemory = new ArrayList<Character>(2);
+        this.smallCharMemory = new ArrayList<>(2);
     }
 
 
@@ -62,7 +62,7 @@ public class JSONTokener {
      * @param inputStream The source.
      */
     public JSONTokener(InputStream inputStream) {
-        this(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+        this(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     }
 
 
@@ -485,38 +485,6 @@ public class JSONTokener {
     }
 
     /**
-     * This method is used to get a JSONObject from the JSONTokener. The strictMode parameter controls the behavior of
-     * the method when parsing the JSONObject.
-     *
-     * @param jsonParserConfiguration which carries options such as strictMode, these methods will
-     *                                strictly adhere to the JSON syntax, throwing a JSONException for any deviations.
-     *                                deviations.
-     * @return A JSONObject which is the next value in the JSONTokener.
-     * @throws JSONException If the JSONObject or JSONArray depth is too large to process.
-     */
-    private JSONObject getJsonObject(JSONParserConfiguration jsonParserConfiguration) {
-        try {
-            return new JSONObject(this, jsonParserConfiguration);
-        } catch (StackOverflowError e) {
-            throw new JSONException("JSON Array or Object depth too large to process.", e);
-        }
-    }
-
-    /**
-     * This method is used to get a JSONArray from the JSONTokener.
-     *
-     * @return A JSONArray which is the next value in the JSONTokener.
-     * @throws JSONException If the JSONArray depth is too large to process.
-     */
-    private JSONArray getJsonArray() {
-        try {
-            return new JSONArray(this);
-        } catch (StackOverflowError e) {
-            throw new JSONException("JSON Array or Object depth too large to process.", e);
-        }
-    }
-
-    /**
      * Get the next simple value from the JSON input. Simple values include strings (wrapped in single or double
      * quotes), numbers, booleans, and null. This method is called when the next character is not '{' or '['.
      *
@@ -621,7 +589,7 @@ public class JSONTokener {
      * @return  A JSONException object, suitable for throwing
      */
     public JSONException syntaxError(String message) {
-        return new JSONException(message + this.toString());
+        return new JSONException(message + this);
     }
 
     /**
@@ -632,7 +600,7 @@ public class JSONTokener {
      * @return  A JSONException object, suitable for throwing
      */
     public JSONException syntaxError(String message, Throwable causedBy) {
-        return new JSONException(message + this.toString(), causedBy);
+        return new JSONException(message + this, causedBy);
     }
 
     /**
