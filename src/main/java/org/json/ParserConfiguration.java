@@ -33,8 +33,8 @@ public class ParserConfiguration {
      * Constructs a new ParserConfiguration with default settings.
      */
     public ParserConfiguration() {
-        this.keepStrings = false;
-        this.maxNestingDepth = DEFAULT_MAXIMUM_NESTING_DEPTH;
+        keepStrings = false;
+        maxNestingDepth = DEFAULT_MAXIMUM_NESTING_DEPTH;
     }
 
     /**
@@ -60,8 +60,8 @@ public class ParserConfiguration {
         // map should be cloned as well. If the values of the map are known to also
         // be immutable, then a shallow clone of the map is acceptable.
         return new ParserConfiguration(
-                this.keepStrings,
-                this.maxNestingDepth
+                keepStrings,
+                maxNestingDepth
         );
     }
 
@@ -72,7 +72,7 @@ public class ParserConfiguration {
      * @return The <code>keepStrings</code> configuration value.
      */
     public boolean isKeepStrings() {
-        return this.keepStrings;
+        return keepStrings;
     }
 
     /**
@@ -85,7 +85,7 @@ public class ParserConfiguration {
      */
     @SuppressWarnings("unchecked")
     public <T extends ParserConfiguration> T withKeepStrings(final boolean newVal) {
-        T newConfig = (T) this.clone();
+        T newConfig = (T) clone();
         newConfig.keepStrings = newVal;
         return newConfig;
     }
@@ -114,7 +114,7 @@ public class ParserConfiguration {
      */
     @SuppressWarnings("unchecked")
     public <T extends ParserConfiguration> T withMaxNestingDepth(int maxNestingDepth) {
-        T newConfig = (T) this.clone();
+        T newConfig = (T) clone();
 
         newConfig.maxNestingDepth = Math.max(maxNestingDepth, UNDEFINED_MAXIMUM_NESTING_DEPTH);
 

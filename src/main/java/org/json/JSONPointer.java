@@ -56,7 +56,7 @@ public class JSONPointer {
          * @return a JSONPointer object
          */
         public JSONPointer build() {
-            return new JSONPointer(this.refTokens);
+            return new JSONPointer(refTokens);
         }
 
         /**
@@ -74,7 +74,7 @@ public class JSONPointer {
             if (token == null) {
                 throw new NullPointerException("token cannot be null");
             }
-            this.refTokens.add(token);
+            refTokens.add(token);
             return this;
         }
 
@@ -86,7 +86,7 @@ public class JSONPointer {
          * @return {@code this}
          */
         public Builder append(int arrayIndex) {
-            this.refTokens.add(String.valueOf(arrayIndex));
+            refTokens.add(String.valueOf(arrayIndex));
             return this;
         }
     }
@@ -126,7 +126,7 @@ public class JSONPointer {
             throw new NullPointerException("pointer cannot be null");
         }
         if (pointer.isEmpty() || pointer.equals("#")) {
-            this.refTokens = Collections.emptyList();
+            refTokens = Collections.emptyList();
             return;
         }
         String refs;
@@ -137,12 +137,12 @@ public class JSONPointer {
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
-        } else if (pointer.startsWith("/")) {
+        } else if (!pointer.isEmpty() && pointer.charAt(0) == '/') {
             refs = pointer.substring(1);
         } else {
             throw new IllegalArgumentException("a JSON pointer should start with '/' or '#/'");
         }
-        this.refTokens = new ArrayList<>();
+        refTokens = new ArrayList<>();
         int slashIdx = -1;
         int prevSlashIdx;
         do {
@@ -151,14 +151,14 @@ public class JSONPointer {
             if(prevSlashIdx == slashIdx || prevSlashIdx == refs.length()) {
                 // found 2 slashes in a row ( obj//next )
                 // or single slash at the end of a string ( obj/test/ )
-                this.refTokens.add("");
+                refTokens.add("");
             } else if (slashIdx >= 0) {
                 final String token = refs.substring(prevSlashIdx, slashIdx);
-                this.refTokens.add(unescape(token));
+                refTokens.add(unescape(token));
             } else {
                 // last item after separator, or no separator at all.
                 final String token = refs.substring(prevSlashIdx);
-                this.refTokens.add(unescape(token));
+                refTokens.add(unescape(token));
             }
         } while (slashIdx >= 0);
         // using split does not take into account consecutive separators or "ending nulls"
@@ -192,11 +192,11 @@ public class JSONPointer {
      * @throws JSONPointerException if an error occurs during evaluation
      */
     public Object queryFrom(Object document) throws JSONPointerException {
-        if (this.refTokens.isEmpty()) {
+        if (refTokens.isEmpty()) {
             return document;
         }
         Object current = document;
-        for (String token : this.refTokens) {
+        for (String token : refTokens) {
             if (current instanceof JSONObject) {
                 current = ((JSONObject) current).opt(unescape(token));
             } else if (current instanceof JSONArray) {
@@ -242,7 +242,7 @@ public class JSONPointer {
     @Override
     public String toString() {
         StringBuilder rval = new StringBuilder();
-        for (String token: this.refTokens) {
+        for (String token: refTokens) {
             rval.append('/').append(escape(token));
         }
         return rval.toString();
@@ -270,7 +270,7 @@ public class JSONPointer {
     public String toURIFragment() {
         try {
             StringBuilder rval = new StringBuilder("#");
-            for (String token : this.refTokens) {
+            for (String token : refTokens) {
                 rval.append('/').append(URLEncoder.encode(token, ENCODING));
             }
             return rval.toString();
