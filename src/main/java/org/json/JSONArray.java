@@ -83,11 +83,24 @@ public class JSONArray implements Iterable<Object> {
      *             If there is a syntax error.
      */
     public JSONArray(JSONTokener x) throws JSONException {
+        this(x, x.getJsonParserConfiguration());
+    }
+
+    /**
+     * Constructs a JSONArray from a JSONTokener and a JSONParserConfiguration.
+     *
+     * @param x                       A JSONTokener instance from which the JSONArray is constructed.
+     * @param jsonParserConfiguration A JSONParserConfiguration instance that controls the behavior of the parser.
+     * @throws JSONException If a syntax error occurs during the construction of the JSONArray.
+     */
+    public JSONArray(JSONTokener x, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
         this();
+
+        boolean isInitial = x.getPrevious() == 0;
         if (x.nextClean() != '[') {
             throw x.syntaxError("A JSONArray text must start with '['");
         }
-        
+
         char nextChar = x.nextClean();
         if (nextChar == 0) {
             // array is unclosed. No ']' found, instead EOF
@@ -114,15 +127,34 @@ public class JSONArray implements Iterable<Object> {
                         throw x.syntaxError("Expected a ',' or ']'");
                     }
                     if (nextChar == ']') {
+                        // trailing commas are not allowed in strict mode
+                        if (jsonParserConfiguration.isStrictMode()) {
+                            throw x.syntaxError("Strict mode error: Expected another array element");
+                        }
+                        return;
+                    }
+                    if (nextChar == ',') {
+                        // consecutive commas are not allowed in strict mode
+                        if (jsonParserConfiguration.isStrictMode()) {
+                            throw x.syntaxError("Strict mode error: Expected a valid array element");
+                        }
                         return;
                     }
                     x.back();
                     break;
                 case ']':
+                    if (isInitial && jsonParserConfiguration.isStrictMode() &&
+                            x.nextClean() != 0) {
+                        throw x.syntaxError("Strict mode error: Unparsed characters found at end of input text");
+                    }
                     return;
                 default:
                     throw x.syntaxError("Expected a ',' or ']'");
                 }
+            }
+        } else {
+            if (isInitial && jsonParserConfiguration.isStrictMode() && x.nextClean() != 0) {
+                throw x.syntaxError("Strict mode error: Unparsed characters found at end of input text");
             }
         }
     }
@@ -138,7 +170,22 @@ public class JSONArray implements Iterable<Object> {
      *             If there is a syntax error.
      */
     public JSONArray(String source) throws JSONException {
-        this(new JSONTokener(source));
+        this(source, new JSONParserConfiguration());
+    }
+
+    /**
+     * Construct a JSONArray from a source JSON text.
+     *
+     * @param source
+     *            A string that begins with <code>[</code>&nbsp;<small>(left
+     *            bracket)</small> and ends with <code>]</code>
+     *            &nbsp;<small>(right bracket)</small>.
+     * @param jsonParserConfiguration the parser config object
+     * @throws JSONException
+     *             If there is a syntax error.
+     */
+    public JSONArray(String source, JSONParserConfiguration jsonParserConfiguration) throws JSONException {
+        this(new JSONTokener(source, jsonParserConfiguration), jsonParserConfiguration);
     }
 
     /**
