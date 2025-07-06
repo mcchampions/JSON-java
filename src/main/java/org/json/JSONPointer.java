@@ -4,7 +4,6 @@ import static java.lang.String.format;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,81 +34,6 @@ public class JSONPointer {
     // used for URL encoding and decoding
     private static final String ENCODING = "utf-8";
 
-    /**
-     * This class allows the user to build a JSONPointer in steps, using
-     * exactly one segment in each step.
-     */
-    public static class Builder {
-
-        /**
-         * Constructs a new Builder object.
-         */
-        public Builder() {
-        }
-
-        // Segments for the eventual JSONPointer string
-        private final List<String> refTokens = new ArrayList<>();
-
-        /**
-         * Creates a {@code JSONPointer} instance using the tokens previously set using the
-         * {@link #append(String)} method calls.
-         * @return a JSONPointer object
-         */
-        public JSONPointer build() {
-            return new JSONPointer(refTokens);
-        }
-
-        /**
-         * Adds an arbitrary token to the list of reference tokens. It can be any non-null value.
-         * Unlike in the case of JSON string or URI fragment representation of JSON pointers, the
-         * argument of this method MUST NOT be escaped. If you want to query the property called
-         * {@code "a~b"} then you should simply pass the {@code "a~b"} string as-is, there is no
-         * need to escape it as {@code "a~0b"}.
-         * 
-         * @param token the new token to be appended to the list
-         * @return {@code this}
-         * @throws NullPointerException if {@code token} is null
-         */
-        public Builder append(String token) {
-            if (token == null) {
-                throw new NullPointerException("token cannot be null");
-            }
-            refTokens.add(token);
-            return this;
-        }
-
-        /**
-         * Adds an integer to the reference token list. Although not necessarily, mostly this token will
-         * denote an array index. 
-         * 
-         * @param arrayIndex the array index to be added to the token list
-         * @return {@code this}
-         */
-        public Builder append(int arrayIndex) {
-            refTokens.add(String.valueOf(arrayIndex));
-            return this;
-        }
-    }
-
-    /**
-     * Static factory method for {@link Builder}. Example usage:
-     * 
-     * <pre><code>
-     * JSONPointer pointer = JSONPointer.builder()
-     *       .append("obj")
-     *       .append("other~key").append("another/key")
-     *       .append("\"")
-     *       .append(0)
-     *       .build();
-     * </code></pre>
-     * 
-     *  @return a builder instance which can be used to construct a {@code JSONPointer} instance by chained
-     *  {@link Builder#append(String)} calls.
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
     // Segments for the JSONPointer string
     private final List<String> refTokens;
 
@@ -122,11 +46,8 @@ public class JSONPointer {
      * @throws IllegalArgumentException if {@code pointer} is not a valid JSON pointer
      */
     public JSONPointer(final String pointer) {
-        if (pointer == null) {
-            throw new NullPointerException("pointer cannot be null");
-        }
-        if (pointer.isEmpty() || pointer.equals("#")) {
-            refTokens = Collections.emptyList();
+        if (pointer.isEmpty() || "#".equals(pointer)) {
+            this.refTokens = Collections.emptyList();
             return;
         }
         String refs;
@@ -137,7 +58,7 @@ public class JSONPointer {
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
-        } else if (!pointer.isEmpty() && pointer.charAt(0) == '/') {
+        } else if (pointer.charAt(0) == '/') {
             refs = pointer.substring(1);
         } else {
             throw new IllegalArgumentException("a JSON pointer should start with '/' or '#/'");
@@ -164,15 +85,6 @@ public class JSONPointer {
         // using split does not take into account consecutive separators or "ending nulls"
     }
 
-    /**
-     * Constructs a new JSONPointer instance with the provided list of reference tokens.
-     *
-     * @param refTokens A list of strings representing the reference tokens for the JSON Pointer.
-     *                  Each token identifies a step in the path to the targeted value.
-     */
-    public JSONPointer(List<String> refTokens) {
-        this.refTokens = new ArrayList<>(refTokens);
-    }
 
     /**
      * @see <a href="https://tools.ietf.org/html/rfc6901#section-3">rfc6901 section 3</a>
@@ -242,7 +154,7 @@ public class JSONPointer {
     @Override
     public String toString() {
         StringBuilder rval = new StringBuilder();
-        for (String token: refTokens) {
+        for (String token: this.refTokens) {
             rval.append('/').append(escape(token));
         }
         return rval.toString();
@@ -261,22 +173,4 @@ public class JSONPointer {
         return token.replace("~", "~0")
                 .replace("/", "~1");
     }
-
-    /**
-     * Returns a string representing the JSONPointer path value using URI
-     * fragment identifier representation
-     * @return a uri fragment string
-     */
-    public String toURIFragment() {
-        try {
-            StringBuilder rval = new StringBuilder("#");
-            for (String token : refTokens) {
-                rval.append('/').append(URLEncoder.encode(token, ENCODING));
-            }
-            return rval.toString();
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    
 }
